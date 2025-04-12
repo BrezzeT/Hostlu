@@ -1,0 +1,130 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      String   @default("USER")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id            String        @id @default(cuid())
+  name          String
+  description   String?
+  slug          String        @unique
+  subCategories SubCategory[]
+  products      Product[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model SubCategory {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  slug        String    @unique
+  category    Category  @relation(fields: [categoryId], references: [id])
+  categoryId  String
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Product {
+  id            String      @id @default(cuid())
+  name          String
+  description   String
+  price         Float
+  dimensions    String?
+  material      String?
+  images        String      // Will store JSON array of image URLs
+  slug          String      @unique
+  category      Category?   @relation(fields: [categoryId], references: [id])
+  categoryId    String?
+  subCategory   SubCategory? @relation(fields: [subCategoryId], references: [id])
+  subCategoryId String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+// Предопределенные категории мебели
+enum FurnitureCategory {
+  CHAIRS        // Стулья
+  SOFAS         // Диваны и кресла
+  BEDS          // Кровати
+  OTTOMANS      // Пуфики
+  TABLES        // Столы
+}
+
+// Предопределенные материалы
+enum MaterialType {
+  WOOD          // Дерево
+  METAL         // Металл
+  PLASTIC       // Пластик
+  FABRIC        // Ткань
+  LEATHER       // Кожа
+  GLASS         // Стекло
+}
+
+enum CategoryType {
+  CHAIRS      // Стулья
+  SOFAS       // Диваны
+  BEDS        // Кровати
+  TABLES      // Столы
+  WARDROBES   // Шкафы
+}
+
+enum SubCategoryType {
+  // Для стульев
+  DINING      // Обеденные
+  BAR         // Барные
+  OFFICE      // Офисные
+  FOLDING     // Складные
+
+  // Для диванов
+  STRAIGHT    // Прямые
+  CORNER      // Угловые
+  MODULAR     // Модульные
+  
+  // Для кроватей
+  SINGLE      // Односпальные
+  DOUBLE      // Двуспальные
+  BUNK        // Двухъярусные
+  
+  // Для столов
+  COFFEE      // Журнальные
+  DINING_TABLE // Обеденные
+  COMPUTER    // Компьютерные
+  
+  // Для шкафов
+  SLIDING     // Купе
+  HINGED      // Распашные
+  BUILT_IN    // Встроенные
+
+  // Материалы
+  WOOD        // Дерево
+  METAL       // Металл
+  GLASS       // Стекло
+  LEATHER     // Кожа
+  FABRIC      // Ткань
+}
